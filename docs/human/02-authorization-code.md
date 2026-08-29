@@ -51,7 +51,7 @@ Host: oauth.certauth.dev
 
 ```http
 HTTP/1.1 302 Found
-Location: https://oauth-playground.certauth.dev/login?interaction=100f49bb0f3d2fba5f659baec9d0421c
+Location: https://oauth-playground.certauth.dev/login?interaction=<interaction>
 ```
 
 O AS não desenhou nada. Ele guardou os parâmetros, criou uma **interação** com prazo de
