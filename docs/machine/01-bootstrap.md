@@ -129,6 +129,11 @@ Content-Type: application/json
 `redirect_uris` is required even for a client that will never use the authorization
 code grant. That is RFC 7591 metadata, not a statement about what you intend to do.
 
+Each entry must use **`https`**, or `http` on a loopback host (`localhost`,
+`127.0.0.1`, `::1`) for native-app development. Any other scheme is rejected with
+`invalid_client_metadata`, at registration and at update alike. Fragments are rejected
+too.
+
 ### Three credentials, three jobs
 
 The response hands you three secrets. They do not overlap, and confusing them is the

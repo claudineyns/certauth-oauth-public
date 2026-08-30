@@ -180,7 +180,16 @@ const assinatura = crypto.sign('sha256', Buffer.from(entrada), chavePrivada);
 
 O `aud` **precisa** ser o issuer do AS. Sem essa checagem, uma assertion emitida para
 outro servidor poderia ser reapresentada aqui — então ela é verificada, não presumida.
-E sem `jti` a assertion é recusada.
+
+`jti` e `exp` são obrigatórios, e **cada `jti` vale uma vez**. Reapresentar a mesma
+assertion, byte a byte, falha mesmo dentro da janela de validade:
+
+```json
+{"error":"invalid_client","error_description":"client_assertion ja apresentada (jti reutilizado)"}
+```
+
+É a mesma proteção que o DPoP tem contra replay — gere um `jti` novo a cada
+requisição.
 
 ```http
 POST /token HTTP/1.1

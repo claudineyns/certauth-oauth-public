@@ -90,8 +90,16 @@ grant_type=client_credentials
 Note there is no `client_id` parameter. The client is identified by the `sub` claim
 inside the assertion — the identity and the proof arrive together.
 
-An assertion without `jti` is rejected. So is one signed with a key that has since
-been reissued: only the current public JWK is held.
+`jti` and `exp` are both required, and **each `jti` is accepted once**. Re-presenting
+the same assertion — byte for byte — fails, even inside its validity window:
+
+```json
+{"error":"invalid_client","error_description":"client_assertion ja apresentada (jti reutilizado)"}
+```
+
+Generate a fresh `jti` per request, exactly as you would a DPoP proof. An assertion
+signed with a key that has since been reissued is also rejected: only the current
+public JWK is held.
 
 ## Mechanism 3 — tls_client_auth (RFC 8705)
 

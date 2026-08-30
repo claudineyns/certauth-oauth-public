@@ -104,6 +104,10 @@ diferença de comportamento.
 > `redirect_uris` é obrigatório mesmo para um cliente que nunca vai redirecionar. É
 > metadado da RFC 7591, não declaração de intenção.
 
+Cada URI precisa usar **`https`** — ou `http` em loopback (`localhost`, `127.0.0.1`,
+`::1`), que é o que a RFC 8252 reserva para desenvolvimento de app nativo. Qualquer
+outro esquema é recusado, tanto no registro quanto na edição. Fragmento também.
+
 ## As três credenciais
 
 A resposta do registro devolve três segredos, e confundi-los é o tropeço mais comum:
