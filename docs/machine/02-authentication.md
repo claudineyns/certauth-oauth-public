@@ -265,6 +265,17 @@ DPoP: <a fresh proof, with htm=GET and htu=https://resource.certauth.dev/api/acc
 
 Presenting a DPoP token under the `Bearer` scheme is refused, and so is the reverse.
 
+**`htu` must arrive without the query string** — the server does not strip it for you.
+Building `htu` from the full request URI is the usual mistake, and it is rejected:
+
+```json
+{"error":"invalid_dpop_proof","error_description":"htu nao pode conter query string"}
+```
+
+The request itself may carry a query; only the proof's `htu` may not. A proof for
+`https://resource.certauth.dev/api/accounts` is the correct one to attach to a call to
+`/api/accounts?limite=5`.
+
 ## Grants
 
 `grant_types_supported` is `authorization_code`, `client_credentials`,

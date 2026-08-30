@@ -87,6 +87,18 @@ recuperável em outro que parece diferente e não é.
 
 Sem prova alguma: `cabecalho DPoP ausente`.
 
+**Outra falha, a mais comum de todas:** montar o `htu` a partir da URL completa da
+requisição.
+
+```json
+{"error":"invalid_dpop_proof","error_description":"htu nao pode conter query string"}
+```
+
+A requisição pode ter query; o `htu` da prova, não. Para chamar
+`/api/accounts?limite=5`, a prova correta traz `htu` como
+`https://resource.certauth.dev/api/accounts` — sem a query. O servidor não a remove
+por você, e aceitar em silêncio ensinaria um formato que outro servidor recusa.
+
 📖 [RFC 9449 §4.2](https://datatracker.ietf.org/doc/html/rfc9449#section-4.2)
 
 ## mTLS — RFC 8705
