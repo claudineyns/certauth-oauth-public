@@ -53,11 +53,11 @@ notice. Matching on it produces integrations that break on a copy edit.
              ^ match on this           ^ never parse this
 ```
 
-Note that four error identifiers are Portuguese words, while the descriptions
-around them are English: `interaction_nao_encontrada`, `sem_certificado_de_cliente`,
-`as_indisponivel`, `as_timeout`. That is not an oversight — an identifier is an opaque
-string, and renaming one would break every integration that matches it. Match them
-literally; do not translate them. The full list is in [04 — Errors](04-errors.md).
+Thirteen of the identifiers come from the RFCs and mean there what they mean here.
+The rest are specific to this system — `invalid_basket`, `rfc_config_immutable`,
+`overloaded`, `issuance_failed`, `interaction_not_found`, `no_client_certificate`,
+`as_unavailable`, `as_timeout`, `not_found`. The full list, with HTTP status and what
+to do about each, is in [04 — Errors](04-errors.md).
 
 ## Notation
 

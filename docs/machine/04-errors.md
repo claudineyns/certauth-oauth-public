@@ -15,14 +15,8 @@ person reading a terminal. It is not part of this contract and it is reworded fr
 every message on this page changed wording once already, in a single pass, without any
 behaviour changing.
 
-Four identifiers are Portuguese words while their descriptions are English. Renaming
-them would break every integration matching on them, so they stay. They are opaque
-strings: match literally, never translate.
-
-```
-  interaction_nao_encontrada     sem_certificado_de_cliente
-  as_indisponivel                as_timeout
-```
+Identifiers are opaque strings: match them literally, and treat an unknown one as a
+condition you do not handle rather than something to parse.
 
 ## Error identifiers
 
@@ -40,8 +34,8 @@ strings: match literally, never translate.
 | `invalid_redirect_uri` | 400 | `redirect_uris` malformed or absent | Fix. Required even for clients that never redirect. |
 | `invalid_dpop_proof` | 400/401 | Proof malformed, expired, replayed, or not matching the token key | Generate a **fresh** proof. See below. |
 | `rfc_config_immutable` | 400 | Attempted to change the basket | Register a new client. Never retryable. |
-| `interaction_nao_encontrada` | 404 | Interaction expired or unknown — 5-minute lifetime | Restart the authorization request. |
-| `sem_certificado_de_cliente` | 400 | Only from `/whoami-cert`: no client certificate on this connection | Use the mutual-TLS host and present one. |
+| `interaction_not_found` | 404 | Interaction expired or unknown — 5-minute lifetime | Restart the authorization request. |
+| `no_client_certificate` | 400 | Only from `/whoami-cert`: no client certificate on this connection | Use the mutual-TLS host and present one. |
 
 ### From the Resource Server
 
@@ -55,15 +49,24 @@ strings: match literally, never translate.
 | `access_denied` | 403 | Consent belongs to other parties | Not retryable. |
 | `not_found` | 404 | Account, transaction or entity does not exist | Not retryable. |
 
-### From the UI backend
+### From the UI backend and the certificate authority
 
-| `error` | HTTP | Meaning |
-|---|---|---|
-| `as_indisponivel` | 502 | The backend could not reach the Authorization Server |
-| `as_timeout` | 504 | The Authorization Server did not answer in time |
+| `error` | HTTP | Meaning | Action |
+|---|---|---|---|
+| `overloaded` | 503 | Too many key or certificate issuances in flight | **Retry.** The response carries `Retry-After`; honour it. |
+| `issuance_failed` | 500 · 502 | The certificate authority did not produce the material | Retry once; if it persists, it is not your request. |
+| `as_unavailable` | 502 | The backend could not reach the Authorization Server | Retry with backoff. |
+| `as_timeout` | 504 | The Authorization Server did not answer in time | Retry with backoff. |
+| `invalid_basket` | 400 | Basket combination rejected | Only reachable through the manual step; not part of unattended flow. |
 
-These two — and only these two — indicate a transport condition rather than a
-rejected request. They are the ones worth retrying with backoff.
+**These are the only errors worth retrying.** Everything in the two tables above is a
+decision about your request, and repeating it produces the same answer.
+
+`overloaded` deserves care: it is not a rate limit and not a rejection of what you
+asked for. Issuing a key pair or a certificate is expensive, and only a few run at a
+time; beyond that the request is declined immediately rather than queued. Waiting the
+`Retry-After` and repeating is the correct behaviour — repeating without waiting is
+what turns a healthy limit into an outage.
 
 ## Lifetimes
 
@@ -135,7 +138,7 @@ Cause and effect, in the order you are likely to trip over them.
       if response.status == 403:
           stop — scope, consent or authorization problem
           # consent_required in particular: a fresh token is refused identically
-      if response.error in ("as_indisponivel", "as_timeout"):
+      if response.error in ("as_unavailable", "as_timeout"):
           retry with backoff
       return response
 ```

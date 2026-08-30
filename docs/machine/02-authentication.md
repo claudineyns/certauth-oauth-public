@@ -176,7 +176,7 @@ Compare `x5t_s256` against the value returned when the certificate was issued. I
 they differ, the client is presenting a different certificate than it thinks.
 
 On a connection with no client certificate the same endpoint answers `400` with
-`sem_certificado_de_cliente`. This endpoint is a diagnostic; it authenticates
+`no_client_certificate`. This endpoint is a diagnostic; it authenticates
 nothing.
 
 ## Token formats
