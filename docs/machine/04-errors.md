@@ -87,6 +87,12 @@ Everything expires. Nothing here is permanent.
 The practical ceiling is **24 hours for an entire integration**. After that the
 client is gone and a human must create a new basket. Build for that, not around it.
 
+**Clock tolerance: 10 seconds.** Every `exp`, `nbf` and `iat` check allows that much
+drift and no more — for client assertions, JAR request objects and JWT access tokens
+alike. The rejection reads `token expirado` whatever the cause, so if artifacts you
+just signed start failing, check the clock on the signing host before checking your
+code.
+
 ## What invalidates what
 
 Cause and effect, in the order you are likely to trip over them.

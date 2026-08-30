@@ -193,6 +193,11 @@ const assinatura = crypto.sign('sha256', Buffer.from(entrada), chavePrivada);
 O `aud` **precisa** ser o issuer do AS. Sem essa checagem, uma assertion emitida para
 outro servidor poderia ser reapresentada aqui — então ela é verificada, não presumida.
 
+**A tolerância de relógio é de 10 segundos** — vale para `exp`, `iat` e `nbf`, aqui e
+também no request object do JAR. Se a máquina que assina estiver dessincronizada além
+disso, uma assertion recém-gerada é recusada como `token expirado`, mensagem que não
+aponta para a causa. Antes de procurar erro na assinatura, confira o relógio.
+
 `jti` e `exp` são obrigatórios, e **cada `jti` vale uma vez**. Reapresentar a mesma
 assertion, byte a byte, falha mesmo dentro da janela de validade:
 

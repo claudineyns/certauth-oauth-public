@@ -73,6 +73,11 @@ Build a JWT and sign it with the private key. Claims:
 
 Header: `{"alg":"RS256","typ":"JWT"}`. RS256 is the only accepted algorithm here.
 
+**Clock tolerance is 10 seconds.** `exp`, `nbf` and `iat` are checked with that
+allowance and no more — the same limit applies to JAR request objects and to JWT
+access tokens. Keep the signing host in sync; see
+[04 — Errors and lifetimes](04-errors.md).
+
 `aud` must be the issuer. Without that check an assertion minted for a different
 server could be replayed against this one, so it is enforced rather than assumed.
 
