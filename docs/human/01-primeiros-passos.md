@@ -138,7 +138,7 @@ Tentar alterar a cesta tem resposta própria, e não silêncio:
 
 ```json
 {"error":"rfc_config_immutable",
- "error_description":"A cesta de RFC e imutavel. Para usar outra combinacao, registre um novo client."}
+ "error_description":"The RFC basket is immutable. To use another combination, register a new client."}
 ```
 
 É também na tela de manutenção que se emite o material que a cesta exigir — certificado

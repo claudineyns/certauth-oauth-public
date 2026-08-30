@@ -15,11 +15,11 @@ próprio**, montado com aquela combinação.
 Coberto em detalhe no [capítulo 02](02-authorization-code.md). O resumo do que quebra:
 
 ```json
-{"error":"invalid_grant","error_description":"code_verifier nao corresponde ao code_challenge"}
+{"error":"invalid_grant","error_description":"code_verifier does not match the code_challenge"}
 ```
 
 E a consequência que surpreende: **o código foi consumido na tentativa falha**. Corrigir
-o verifier e repetir devolve `code invalido, expirado ou ja usado`. Recomece do
+o verifier e repetir devolve `code invalid, expired or already used`. Recomece do
 `/authorize`.
 
 📖 [RFC 7636 §4](https://datatracker.ietf.org/doc/html/rfc7636#section-4)
@@ -78,20 +78,20 @@ usa o esquema `DPoP`, não `Bearer`.
 **A falha:** repita a mesma prova.
 
 ```json
-{"error":"invalid_dpop_proof","error_description":"prova DPoP ja usada (replay)"}
+{"error":"invalid_dpop_proof","error_description":"DPoP proof already used (replay)"}
 ```
 
 Cada prova vale **uma vez**, por cinco minutos. Gere uma nova a cada requisição —
 inclusive nas retentativas. Reaproveitar a prova numa retentativa transforma um erro
 recuperável em outro que parece diferente e não é.
 
-Sem prova alguma: `cabecalho DPoP ausente`.
+Sem prova alguma: `missing DPoP header`.
 
 **Outra falha, a mais comum de todas:** montar o `htu` a partir da URL completa da
 requisição.
 
 ```json
-{"error":"invalid_dpop_proof","error_description":"htu nao pode conter query string"}
+{"error":"invalid_dpop_proof","error_description":"htu must not contain a query string"}
 ```
 
 A requisição pode ter query; o `htu` da prova, não. Para chamar
@@ -140,9 +140,9 @@ documento de discovery. **Não há segredo na requisição**: o certificado é a
 
 | Situação | Resposta |
 |---|---|
-| Host errado (TLS simples) | `a cesta deste client exige mTLS: use o host mTLS e apresente o certificado` |
-| Certificado não registrado | `o certificado apresentado nao e o registrado para este client` |
-| Token vinculado a certificado anterior | `o certificado deste token nao e mais o registrado para o client — houve reemissao` |
+| Host errado (TLS simples) | `the basket for this client requires mTLS: use the mTLS host and present the certificate` |
+| Certificado não registrado | `the presented certificate is not the one registered for this client` |
+| Token vinculado a certificado anterior | `the certificate for this token is no longer the one registered for the client` |
 
 Conectar ao host mTLS **sem certificado nenhum** falha antes do HTTP existir, no
 handshake TLS. Espere erro de transporte, não JSON.
@@ -202,7 +202,7 @@ aponta para a causa. Antes de procurar erro na assinatura, confira o relógio.
 assertion, byte a byte, falha mesmo dentro da janela de validade:
 
 ```json
-{"error":"invalid_client","error_description":"client_assertion ja apresentada (jti reutilizado)"}
+{"error":"invalid_client","error_description":"client_assertion already presented (jti reused)"}
 ```
 
 É a mesma proteção que o DPoP tem contra replay — gere um `jti` novo a cada
@@ -225,7 +225,7 @@ assertion. Identidade e prova chegam juntas.
 
 ```json
 {"error":"invalid_client",
- "error_description":"a cesta deste client exige client_assertion (RFC 7523); client_secret nao e aceito"}
+ "error_description":"the basket for this client requires client_assertion (RFC 7523); client_secret is not accepted"}
 ```
 
 Reemitir o par de chaves invalida toda assertion assinada com a chave anterior — só a
@@ -264,7 +264,7 @@ Duas propriedades que diferenciam o PAR de tudo o mais no playground: ele vale
 mesmo dentro da janela:
 
 ```json
-{"error":"invalid_request","error_description":"request_uri invalido, expirado ou ja usado"}
+{"error":"invalid_request","error_description":"request_uri invalid, expired or already used"}
 ```
 
 📖 [RFC 9126](https://datatracker.ietf.org/doc/html/rfc9126)
@@ -331,14 +331,14 @@ Repetir o token:
 
 ```json
 {"error":"invalid_token",
- "error_description":"este token RAR ja foi usado; tokens de iniciacao de pagamento valem uma vez so"}
+ "error_description":"this RAR token has already been used; payment initiation tokens are valid once only"}
 ```
 
 Executar valor diferente do autorizado:
 
 ```json
 {"error":"invalid_authorization_details",
- "error_description":"a transacao diverge do que foi autorizado: amount (autorizado 150)"}
+ "error_description":"the transaction diverges from what was authorized: amount (authorized 150)"}
 ```
 
 Sem essa segunda conferência o `authorization_details` seria enfeite — o cliente pediria

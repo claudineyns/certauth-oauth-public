@@ -43,19 +43,21 @@ differ.
 **3. Branch on `error`, never on `error_description`.**
 
 Responses carry two fields. `error` is a stable identifier and is part of this
-contract. `error_description` is human prose, it is written in Portuguese, and it
-will change without notice.
+contract. `error_description` is human prose meant for a person reading a terminal:
+it is **not** part of the contract, it is not stable, and it will be reworded without
+notice. Matching on it produces integrations that break on a copy edit.
 
 ```
   {"error":"invalid_client",
-   "error_description":"a cesta deste client exige mTLS: use o host mTLS e apresente o certificado"}
+   "error_description":"the basket for this client requires mTLS: use the mTLS host and present the certificate"}
              ^ match on this           ^ never parse this
 ```
 
-Note that four error identifiers are themselves Portuguese words:
-`interaction_nao_encontrada`, `sem_certificado_de_cliente`, `as_indisponivel`,
-`as_timeout`. They are identifiers, not text. Match them literally; do not translate
-them. The full list is in [04 — Errors](04-errors.md).
+Note that four error identifiers are Portuguese words, while the descriptions
+around them are English: `interaction_nao_encontrada`, `sem_certificado_de_cliente`,
+`as_indisponivel`, `as_timeout`. That is not an oversight — an identifier is an opaque
+string, and renaming one would break every integration that matches it. Match them
+literally; do not translate them. The full list is in [04 — Errors](04-errors.md).
 
 ## Notation
 

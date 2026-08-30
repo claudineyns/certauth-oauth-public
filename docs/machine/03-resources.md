@@ -87,7 +87,7 @@ client is rejected:
 
 ```json
 {"error":"invalid_request",
- "error_description":"account_id ausente ou nao pertence ao titular do token"}
+ "error_description":"account_id missing or does not belong to the subject of the token"}
 ```
 
 ## Creating a transaction
@@ -135,7 +135,7 @@ HTTP/1.1 403 Forbidden
 WWW-Authenticate: Bearer error="insufficient_scope", scope="transactions:read"
 ```
 ```json
-{"error":"insufficient_scope","error_description":"escopo(s) necessario(s): transactions:read"}
+{"error":"insufficient_scope","error_description":"required scope(s): transactions:read"}
 ```
 
 Unknown, expired or revoked token — all three collapse into one response, and you
@@ -143,14 +143,14 @@ cannot tell them apart. Treat them identically: acquire a new token.
 
 ```http
 HTTP/1.1 401 Unauthorized
-WWW-Authenticate: Bearer error="invalid_token", error_description="token inativo, expirado ou revogado"
+WWW-Authenticate: Bearer error="invalid_token", error_description="token inactive, expired or revoked"
 ```
 
 Missing header:
 
 ```http
 HTTP/1.1 401 Unauthorized
-WWW-Authenticate: Bearer error="invalid_token", error_description="Authorization ausente (Bearer ou DPoP)"
+WWW-Authenticate: Bearer error="invalid_token", error_description="missing Authorization (Bearer or DPoP)"
 ```
 
 ## Certificate-bound tokens
@@ -161,9 +161,9 @@ difference between them is diagnostic:
 
 | Response | Meaning | What to do |
 |---|---|---|
-| `este token e vinculado a certificado: use o host mTLS e apresente o certificado` | You called the plain-TLS host | Retry against `resource-mtls.certauth.dev` |
-| `o certificado apresentado nao e aquele a que este token foi vinculado` | Wrong certificate for this token | Use the certificate the token was issued with |
-| `o certificado deste token nao e mais o registrado para o client — houve reemissao` | The certificate was reissued after this token was minted | Discard every token bound to the old certificate; acquire new ones |
+| `this token is certificate-bound: use the mTLS host and present the certificate` | You called the plain-TLS host | Retry against `resource-mtls.certauth.dev` |
+| `the presented certificate is not the one this token was bound to` | Wrong certificate for this token | Use the certificate the token was issued with |
+| `the certificate for this token is no longer the one registered for the client` | The certificate was reissued after this token was minted | Discard every token bound to the old certificate; acquire new ones |
 
 The third exists because the check compares the presented certificate against **two**
 values: the token's `cnf`, and the thumbprint currently registered for the client. The
@@ -210,7 +210,7 @@ HTTP/1.1 403 Forbidden
 ```
 ```json
 {"error":"consent_required",
- "error_description":"nao ha consentimento ativo desta PJ para este client — pode ter sido revogado"}
+ "error_description":"no active consent from this legal entity for this client; it may have been revoked"}
 ```
 
 The distinction is operationally important. `invalid_token` (401) means *get a new

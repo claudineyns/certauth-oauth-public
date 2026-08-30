@@ -34,7 +34,7 @@ client. A second attempt with the same token:
 
 ```json
 {"error":"invalid_token",
- "error_description":"initial_registration_token invalido, expirado ou ja usado"}
+ "error_description":"initial_registration_token invalid, expired or already used"}
 ```
 
 If your integration needs to survive past 24 hours, it needs a human to produce a
@@ -191,7 +191,7 @@ HTTP/1.1 400 Bad Request
 ```
 ```json
 {"error":"rfc_config_immutable",
- "error_description":"A cesta de RFC e imutavel. Para usar outra combinacao, registre um novo client."}
+ "error_description":"The RFC basket is immutable. To use another combination, register a new client."}
 ```
 
 Delete, which cascades:
@@ -208,7 +208,7 @@ After a delete the maintenance token stops resolving:
 
 ```json
 {"error":"invalid_token",
- "error_description":"maintenance_token invalido para este client"}
+ "error_description":"maintenance_token invalid for this client"}
 ```
 
 The cascade removes the client record, its basket, its registered certificate
@@ -249,7 +249,7 @@ there would be nothing to sign:
 
 ```json
 {"error":"invalid_request",
- "error_description":"a cesta deste client nao inclui JAR nem Client Assertion; nao ha uso para o par de chaves"}
+ "error_description":"the basket for this client includes neither JAR nor Client Assertion; there is no use for a key pair"}
 ```
 
 ### Client certificate — for mutual TLS

@@ -27,7 +27,7 @@ HTTP/1.1 200 OK
 O efeito é imediato:
 
 ```json
-{"error":"invalid_token","error_description":"token inativo, expirado ou revogado"}
+{"error":"invalid_token","error_description":"token inactive, expired or revoked"}
 ```
 
 Duas armadilhas da RFC 7009 que valem conhecer:
@@ -65,7 +65,7 @@ HTTP/1.1 403 Forbidden
 ```
 ```json
 {"error":"consent_required",
- "error_description":"nao ha consentimento ativo desta PJ para este client — pode ter sido revogado"}
+ "error_description":"no active consent from this legal entity for this client; it may have been revoked"}
 ```
 
 ## O detalhe que revela o desenho

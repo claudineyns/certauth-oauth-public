@@ -80,7 +80,7 @@ Content-Type: application/json
 Com senha errada:
 
 ```json
-{"error":"access_denied","error_description":"identificador de PJ ou senha invalidos"}
+{"error":"access_denied","error_description":"invalid legal entity identifier or password"}
 ```
 
 Com a senha certa, o AS avança o estado e diz para onde ir:
@@ -143,14 +143,14 @@ grant_type=authorization_code
 ### Se o verifier estiver errado
 
 ```json
-{"error":"invalid_grant","error_description":"code_verifier nao corresponde ao code_challenge"}
+{"error":"invalid_grant","error_description":"code_verifier does not match the code_challenge"}
 ```
 
 E aqui vem o detalhe que custa tempo a quem não sabe: **o código foi consumido na
 tentativa falha**. Repetindo com o verifier correto:
 
 ```json
-{"error":"invalid_grant","error_description":"code invalido, expirado ou ja usado"}
+{"error":"invalid_grant","error_description":"code invalid, expired or already used"}
 ```
 
 Não é bug. Um authorization code vale **uma vez**, com sucesso ou sem. Errou o

@@ -63,7 +63,7 @@ HTTP/1.1 403 Forbidden
 WWW-Authenticate: Bearer error="insufficient_scope", scope="profile:read"
 ```
 ```json
-{"error":"insufficient_scope","error_description":"escopo(s) necessario(s): profile:read"}
+{"error":"insufficient_scope","error_description":"required scope(s): profile:read"}
 ```
 
 O cabeçalho `WWW-Authenticate` **nomeia o que falta**. Vale ler antes de sair

@@ -22,7 +22,7 @@ selects assertions, presenting a perfectly valid secret:
 
 ```json
 {"error":"invalid_client",
- "error_description":"a cesta deste client exige client_assertion (RFC 7523); client_secret nao e aceito"}
+ "error_description":"the basket for this client requires client_assertion (RFC 7523); client_secret is not accepted"}
 ```
 
 And the reverse — a client whose basket does not include assertions, sending one —
@@ -99,7 +99,7 @@ inside the assertion — the identity and the proof arrive together.
 the same assertion — byte for byte — fails, even inside its validity window:
 
 ```json
-{"error":"invalid_client","error_description":"client_assertion ja apresentada (jti reutilizado)"}
+{"error":"invalid_client","error_description":"client_assertion already presented (jti reused)"}
 ```
 
 Generate a fresh `jti` per request, exactly as you would a DPoP proof. An assertion
@@ -136,14 +136,14 @@ Wrong host — the request reached the plain-TLS endpoint, where no certificate 
 presented:
 ```json
 {"error":"invalid_client",
- "error_description":"a cesta deste client exige mTLS: use o host mTLS e apresente o certificado"}
+ "error_description":"the basket for this client requires mTLS: use the mTLS host and present the certificate"}
 ```
 
 Right host, wrong certificate — the thumbprint does not match the registered one,
 which is what you see after a reissue:
 ```json
 {"error":"invalid_client",
- "error_description":"o certificado apresentado nao e o registrado para este client"}
+ "error_description":"the presented certificate is not the one registered for this client"}
 ```
 
 Connecting to the mutual-TLS host **without** any certificate fails during the TLS
@@ -255,7 +255,7 @@ The response differs from the Bearer case in one field:
 ```
 
 **Every proof is single-use.** The `jti` is recorded for five minutes; presenting it
-again returns `invalid_dpop_proof` with `prova DPoP ja usada (replay)`. Generate a
+again returns `invalid_dpop_proof` with `DPoP proof already used (replay)`. Generate a
 fresh proof per request — including retries. Reusing a proof on a retry is the most
 likely way to break a DPoP integration.
 
@@ -274,7 +274,7 @@ Presenting a DPoP token under the `Bearer` scheme is refused, and so is the reve
 Building `htu` from the full request URI is the usual mistake, and it is rejected:
 
 ```json
-{"error":"invalid_dpop_proof","error_description":"htu nao pode conter query string"}
+{"error":"invalid_dpop_proof","error_description":"htu must not contain a query string"}
 ```
 
 The request itself may carry a query; only the proof's `htu` may not. A proof for
@@ -325,7 +325,7 @@ HTTP/1.1 200 OK
 The effect is immediate. The next resource call with that token:
 
 ```json
-{"error":"invalid_token","error_description":"token inativo, expirado ou revogado"}
+{"error":"invalid_token","error_description":"token inactive, expired or revoked"}
 ```
 
 Per RFC 7009, revoking an unknown or already-revoked token also returns `200`.

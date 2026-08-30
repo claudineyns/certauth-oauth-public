@@ -7,15 +7,17 @@
 Every error response has the same shape:
 
 ```json
-{"error": "<identifier>", "error_description": "<human prose, in Portuguese>"}
+{"error": "<identifier>", "error_description": "<human prose, not part of the contract>"}
 ```
 
 **Branch on `error`. Never parse `error_description`.** The description exists for a
-person reading a terminal; it is written in Portuguese, it is not part of this
-contract, and it changes.
+person reading a terminal. It is not part of this contract and it is reworded freely —
+every message on this page changed wording once already, in a single pass, without any
+behaviour changing.
 
-Some identifiers are themselves Portuguese words. They are identifiers all the same —
-opaque strings to be matched literally, never translated:
+Four identifiers are Portuguese words while their descriptions are English. Renaming
+them would break every integration matching on them, so they stay. They are opaque
+strings: match literally, never translate.
 
 ```
   interaction_nao_encontrada     sem_certificado_de_cliente
@@ -153,7 +155,7 @@ will keep issuing tokens that the Resource Server keeps refusing.
 
 **Generate a new DPoP proof for every attempt, including retries.** Proofs are
 single-use for five minutes. Reusing one on a retry turns a recoverable 401 into
-`prova DPoP ja usada (replay)`, which looks like a different fault and is not.
+`DPoP proof already used (replay)`, which looks like a different fault and is not.
 
 ## Idempotency
 
