@@ -165,14 +165,50 @@ Authorization: Bearer <access_token>
 ```
 
 ```json
-{"account_id": "ACA5F94A33A3",
- "saldo_disponivel": 86714.29,
+{"account_id": "AC618695DA4E",
+ "saldo_disponivel": 0,
  "moeda": "BRL",
- "atualizado_em": "2026-08-29T22:31:21.289Z"}
+ "atualizado_em": "2026-08-30T06:02:49.011Z"}
 ```
 
 Descubra o `account_id` com `GET /api/accounts` — ele deriva da PJ e será diferente do
 mostrado aqui.
+
+**Zero, e está certo.** A conta nasce vazia: o saldo é exatamente a soma do que você
+lançar, e nada foi lançado ainda. Não há histórico fictício para ler — o extrato de uma
+conta nova vem `[]`.
+
+Para ter dinheiro, deposite. É o próprio playground ensinando o par `tipo`/`sentido`:
+
+```http
+POST /api/transactions HTTP/1.1
+Host: resource.certauth.dev
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{"account_id": "<account_id>", "amount": 2500.00,
+ "tipo": "deposito", "sentido": "credito", "descricao": "Aporte inicial"}
+```
+
+Consulte o saldo de novo e ele terá se movido. Parece óbvio, e é a diferença que mais
+custou a existir aqui: até 30/08/2026 as transações eram gravadas mas **não mexiam no
+saldo** — a lista dizia uma coisa e o total dizia outra.
+
+Os quatro campos obrigatórios, e a regra que liga dois deles:
+
+| Campo | Valor |
+|---|---|
+| `amount` | positivo, no máximo duas casas |
+| `tipo` | `pix`, `boleto`, `deposito` ou `retirada` |
+| `sentido` | `debito` ou `credito` |
+| `descricao` | opcional |
+
+`deposito` só credita, `retirada` só debita — pedir o contrário é recusado. `pix` e
+`boleto` andam nos dois sentidos, porque de fato andam. Campos que o servidor não
+conhece são ignorados, não recusados.
+
+E **o saldo pode ficar negativo**: não há checagem de fundos, um débito maior que o
+saldo passa e deixa a conta no vermelho. É o limite especial, de propósito.
 
 ## Renovar sem incomodar ninguém
 

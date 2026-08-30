@@ -76,9 +76,13 @@ Authorization: Bearer <access_token>
 }
 ```
 
-Accounts and history are derived deterministically from the entity identifier. They
-are stable for as long as the entity exists, and they are not stored — only what you
-create is.
+Accounts are derived deterministically from the entity identifier: agency, number and
+`account_id` are a function of it and nothing else. They are stable for as long as the
+entity exists and occupy no storage.
+
+The **balance** is not derived. It starts at zero, and every transaction you create
+moves it. A brand-new account has an empty statement and a zero balance — there is no
+synthetic history to read.
 
 **The identifiers above belong to one capture and will differ for your client.** Each
 basket creates its own entities, and the accounts follow from them. Discover them with
@@ -90,7 +94,37 @@ client is rejected:
  "error_description":"account_id missing or does not belong to the subject of the token"}
 ```
 
+## Balance and statement
+
+A new account, before anything happens to it:
+
+```http
+GET /api/accounts/<account_id>/balance HTTP/1.1
+Authorization: Bearer <access_token>
+```
+```json
+{"account_id": "AC618695DA4E", "saldo_disponivel": 0, "moeda": "BRL",
+ "atualizado_em": "2026-08-30T06:02:49.011Z"}
+```
+
+`GET /api/accounts/<account_id>/extract` returns the balance together with the
+movements. On a new account, `lancamentos` is `[]`.
+
 ## Creating a transaction
+
+Four fields are required — `account_id`, `amount`, `tipo`, `sentido` — and unknown
+fields in the body are **ignored**, not rejected.
+
+| Field | Rule |
+|---|---|
+| `account_id` | must belong to the `sub` of the token |
+| `amount` | positive, at most 2 decimal places |
+| `tipo` | `pix`, `boleto`, `deposito` or `retirada` |
+| `sentido` | `debito` or `credito` |
+| `descricao` | optional, up to 140 characters |
+
+`deposito` only credits and `retirada` only debits; `pix` and `boleto` go both ways.
+There is no `currency` field — the system has one.
 
 ```http
 POST /api/transactions HTTP/1.1
@@ -98,20 +132,31 @@ Host: resource.certauth.dev
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-{"account_id": "AC048867DCBB", "amount": 150.00,
- "currency": "BRL", "contraparte": "Fornecedor Exemplo"}
+{"account_id": "AC618695DA4E", "amount": 2500.00, "tipo": "deposito",
+ "sentido": "credito", "descricao": "Aporte inicial"}
 ```
 
 ```http
 HTTP/1.1 201 Created
 ```
 ```json
-{"transaction_id": "TX055C7B7220F2", "account_id": "AC048867DCBB",
- "tipo": "pix", "sentido": "debito", "amount": 150,
- "currency": "BRL", "contraparte": "Fornecedor Exemplo",
- "data": "2026-08-29T21:33:17.386Z", "origem": "criada",
- "criada_por": "<client_id>"}
+{"transaction_id": "TXABF577E3E504", "account_id": "AC618695DA4E",
+ "tipo": "deposito", "sentido": "credito", "amount": 2500,
+ "descricao": "Aporte inicial", "data": "2026-08-30T06:02:50.084Z",
+ "origem": "criada", "criada_por": "<client_id>"}
 ```
+
+`credito` raises the balance and `debito` lowers it. After the deposit above and a
+`pix` debit of 150.00, the balance reads:
+
+```json
+{"account_id": "AC618695DA4E", "saldo_disponivel": 2350, "moeda": "BRL",
+ "atualizado_em": "2026-08-30T06:02:51.118Z"}
+```
+
+**The balance may go negative.** There is no funds check: a debit larger than the
+balance succeeds and leaves a negative number, simulating an overdraft line. To hold
+funds first, post a `deposito`.
 
 The `account_id` above came from `GET /api/accounts` on the same token — it is not a
 constant, and it is not the same one shown earlier in this page.
@@ -121,11 +166,31 @@ there is nothing to authorize per payment. `origem` reads `criada`.
 
 With a token carrying `authorization_details` — only obtainable through the
 authorization code grant — the same endpoint behaves differently: the token becomes
-single-use, and the request body must match what was authorized down to the amount
-and currency. `origem` then reads `criada_via_rar`. An unattended integration cannot
-reach that path; it is described here so you recognise the distinction if you see it.
+single-use, the request body must match what was authorized down to the amount, and
+`sentido` must be `debito`, because a payment initiation is an outflow. `origem` then
+reads `criada_via_rar`. An unattended integration cannot reach that path; it is
+described here so you recognise the distinction if you see it.
 
 ## Errors you will meet here
+
+Validation of the transaction body. All four are `400` with `invalid_request`:
+
+```json
+{"error":"invalid_request",
+ "error_description":"tipo is required and must be one of: pix, boleto, deposito, retirada"}
+```
+```json
+{"error":"invalid_request",
+ "error_description":"sentido is required and must be one of: debito, credito"}
+```
+```json
+{"error":"invalid_request",
+ "error_description":"tipo and sentido are incompatible: deposito requires sentido credito"}
+```
+```json
+{"error":"invalid_request",
+ "error_description":"amount must have at most 2 decimal places"}
+```
 
 Insufficient scope — note the `WWW-Authenticate` header naming exactly what is
 missing:

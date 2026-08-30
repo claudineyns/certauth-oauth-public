@@ -341,8 +341,17 @@ Executar valor diferente do autorizado:
  "error_description":"the transaction diverges from what was authorized: amount (authorized 150)"}
 ```
 
-Sem essa segunda conferência o `authorization_details` seria enfeite — o cliente pediria
-autorização para um valor e executaria outro.
+Inverter o sentido:
+
+```json
+{"error":"invalid_authorization_details",
+ "error_description":"payment_initiation authorizes an outgoing payment: sentido must be debito"}
+```
+
+Sem a segunda conferência o `authorization_details` seria enfeite — o cliente pediria
+autorização para um valor e executaria outro. Sem a terceira, seria pior: o token
+autorizado a **pagar** R$ 150 serviria para **receber** R$ 150, e a tela de
+consentimento teria mostrado uma saída que virou entrada.
 
 Compare com o mesmo endpoint **sem** RAR, sob `client_credentials`: ali o pagamento é
 repetível, porque o cliente é o próprio dono da conta e não há terceiro a proteger.
