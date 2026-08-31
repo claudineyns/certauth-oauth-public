@@ -110,7 +110,7 @@ o DN e o thumbprint.
 ```json
 {"dn": "CN=<client_id>, O=OAuth Playground",
  "x5t_s256": "<x5t_s256>",
- "validade_dias": 1}
+ "validity_days": 1}
 ```
 
 O `x5t#S256` é o SHA-256 do DER do certificado, em base64url. Você pode conferir por

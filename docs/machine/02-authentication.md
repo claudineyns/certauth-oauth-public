@@ -169,7 +169,7 @@ Host: oauth-mtls.certauth.dev
    "x5t_s256": "<x5t_s256>",
    "subject": "CN=<client_id>, O=OAuth Playground",
    "issuer": "CN=OAuth Playground Root CA, O=OAuth Playground",
-   "valido_ate": "Aug 30 21:27:43 2026 GMT"}}
+   "valid_until": "Aug 30 21:27:43 2026 GMT"}}
 ```
 
 Compare `x5t_s256` against the value returned when the certificate was issued. If

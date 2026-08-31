@@ -236,7 +236,7 @@ X-Maintenance-Token: <registration_access_token>
   "kid": "<kid>",
   "private_key_pem": "-----BEGIN PRIVATE KEY-----\n...",
   "public_jwk": {"kty": "RSA", "n": "...", "e": "AQAB"},
-  "reemissao": false,
+  "reissued": false,
   "notice": "A chave privada e exibida uma unica vez e nao fica no servidor."
 }
 ```
@@ -271,7 +271,7 @@ X-Maintenance-Token: <registration_access_token>
   "dn": "CN=<client_id>, O=OAuth Playground",
   "thumbprint_sha256": "...",
   "x5t_s256": "<x5t_s256>",
-  "validade_dias": 1
+  "validity_days": 1
 }
 ```
 

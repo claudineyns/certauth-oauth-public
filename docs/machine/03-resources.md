@@ -69,10 +69,10 @@ Authorization: Bearer <access_token>
   "holder": "B961D002E8DD28",
   "accounts": [
     {"account_id": "AC9C206FD55E", "type": "checking",
-     "agencia": "4338", "numero": "2891069-9", "currency": "BRL",
+     "branch_code": "4338", "account_number": "2891069-9", "currency": "BRL",
      "holder": "B961D002E8DD28"},
     {"account_id": "ACB18C79E081", "type": "savings",
-     "agencia": "6886", "numero": "8746876-0", "currency": "BRL",
+     "branch_code": "6886", "account_number": "8746876-0", "currency": "BRL",
      "holder": "B961D002E8DD28"}
   ]
 }

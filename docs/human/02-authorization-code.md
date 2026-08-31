@@ -74,7 +74,7 @@ POST /login HTTP/1.1
 Host: oauth.certauth.dev
 Content-Type: application/json
 
-{"interaction": "<interaction>", "pj_id": "<pj_id>", "password": "goldsmith"}
+{"interaction": "<interaction>", "legal_entity_id": "<pj_id>", "password": "goldsmith"}
 ```
 
 Com senha errada:
