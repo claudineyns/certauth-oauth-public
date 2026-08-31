@@ -106,7 +106,7 @@ Authorization: Bearer <access_token>
 ```
 ```json
 {"account_id": "AC618695DA4E", "available_balance": 0, "currency": "BRL",
- "atualizado_em": "2026-08-30T06:02:49.011Z"}
+ "updated_at": "2026-08-30T06:02:49.011Z"}
 ```
 
 `GET /api/accounts/<account_id>/statement` returns the balance together with the
@@ -121,11 +121,11 @@ fields in the body are **ignored**, not rejected.
 |---|---|
 | `account_id` | must belong to the `sub` of the token |
 | `amount` | positive, at most 2 decimal places |
-| `type` | `pix`, `boleto`, `deposito` or `retirada` |
-| `direction` | `debito` or `credito` |
+| `type` | `pix`, `boleto`, `deposit` or `withdrawal` |
+| `direction` | `debit` or `credit` |
 | `description` | optional, up to 140 characters |
 
-`deposito` only credits and `retirada` only debits; `pix` and `boleto` go both ways.
+`deposit` only credits and `withdrawal` only debits; `pix` and `boleto` go both ways.
 There is no `currency` field — the system has one.
 
 ```http
@@ -148,17 +148,17 @@ HTTP/1.1 201 Created
  "origin": "direct", "created_by": "<client_id>"}
 ```
 
-`credito` raises the balance and `debito` lowers it. After the deposit above and a
+`credit` raises the balance and `debit` lowers it. After the deposit above and a
 `pix` debit of 150.00, the balance reads:
 
 ```json
 {"account_id": "AC618695DA4E", "available_balance": 2350, "currency": "BRL",
- "atualizado_em": "2026-08-30T06:02:51.118Z"}
+ "updated_at": "2026-08-30T06:02:51.118Z"}
 ```
 
 **The balance may go negative.** There is no funds check: a debit larger than the
 balance succeeds and leaves a negative number, simulating an overdraft line. To hold
-funds first, post a `deposito`.
+funds first, post a `deposit`.
 
 The `account_id` above came from `GET /api/accounts` on the same token — it is not a
 constant, and it is not the same one shown earlier in this page.
@@ -169,7 +169,7 @@ there is nothing to authorize per payment. `origin` reads `criada`.
 With a token carrying `authorization_details` — only obtainable through the
 authorization code grant — the same endpoint behaves differently: the token becomes
 single-use, the request body must match what was authorized down to the amount, and
-`direction` must be `debito`, because a payment initiation is an outflow. `origin` then
+`direction` must be `debit`, because a payment initiation is an outflow. `origin` then
 reads `criada_via_rar`. An unattended integration cannot reach that path; it is
 described here so you recognise the distinction if you see it.
 
@@ -251,7 +251,7 @@ Authorization: Bearer <access_token>
 ```
 ```json
 {"consents":[{"consent_id":"<client_id>.447550F48AFA89",
-              "client_id":"<client_id>","pj":"447550F48AFA89",
+              "client_id":"<client_id>","legal_entity":"447550F48AFA89",
               "scopes":["accounts:read"],"granted_at":"2026-08-29T21:32:51.670Z"}]}
 ```
 

@@ -45,7 +45,7 @@ endpoint que aceite um identificador de PJ como parâmetro. Não há como pedir 
 de outra pessoa jurídica, porque não há onde escrever o pedido. O `sub` do token é a
 única fonte, e ele foi fixado no momento do login.
 
-## O escopo limita de verdade
+## Limites do escopo
 
 No exemplo acima o consentimento foi só `accounts:read`. Peça o perfil:
 
@@ -62,9 +62,9 @@ WWW-Authenticate: Bearer error="insufficient_scope", scope="profile:read"
 {"error":"insufficient_scope","error_description":"required scope(s): profile:read"}
 ```
 
-O cabeçalho `WWW-Authenticate` **nomeia o que falta**. Vale ler antes de sair
-adivinhando: em `GET /api/accounts/{id}/statement`, por exemplo, faltam dois escopos ao
-mesmo tempo — `accounts:read` **e** `transactions:read`.
+O cabeçalho `WWW-Authenticate` **nomeia o que falta**, e convém lê-lo: em
+`GET /api/accounts/{id}/statement`, por exemplo, faltam dois escopos ao mesmo tempo —
+`accounts:read` **e** `transactions:read`.
 
 Os cinco escopos:
 
@@ -79,9 +79,9 @@ Os cinco escopos:
 Um escopo concedido a mais é permanente até o token expirar — não há como encolher um
 token emitido. Peça o mínimo e emita outro quando precisar de mais.
 
-## O consentimento é um objeto, não um efeito colateral
+## O objeto de consentimento
 
-Ele existe, tem identidade e pode ser consultado:
+O consentimento tem identidade própria e pode ser consultado:
 
 ```http
 GET /api/consents HTTP/1.1
@@ -91,20 +91,19 @@ Authorization: Bearer <access_token>
 ```json
 {"consents":[{"consent_id":"<client_id>.677410B4965245",
               "client_id":"<client_id>",
-              "pj":"677410B4965245",
+              "legal_entity":"677410B4965245",
               "scopes":["accounts:read"],
               "granted_at":"2026-08-29T22:33:34.830Z"}]}
 ```
 
-O `consent_id` é a composição `{client_id}.{pj_id}` — as duas pontas da ponte, no
-próprio nome.
+O `consent_id` é a composição `{client_id}.{pj_id}` — as duas partes, no próprio nome.
 
 Esses dois endpoints — listar e revogar — **só existem para tokens de Authorization
 Code**. Sob `client_credentials` não há delegação: o cliente age por si, e não há
-consentimento a listar. Pedir com um token desses devolve erro, e o motivo é conceitual,
-não uma restrição arbitrária.
+consentimento a listar. Pedir com um token desses devolve erro, por razão conceitual e
+não por restrição arbitrária.
 
-## Registro por API, se quiser exercitar
+## Registro via API (RFC 7591)
 
 O capítulo 01 registrou o cliente pelo caminho curto. Quem quiser exercitar o
 **Dynamic Client Registration** como protocolo tem a RFC 7591 completa, e a RFC 7592

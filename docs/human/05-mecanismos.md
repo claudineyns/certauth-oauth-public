@@ -18,9 +18,8 @@ Coberto em detalhe no [capítulo 02](02-authorization-code.md). O resumo do que 
 {"error":"invalid_grant","error_description":"code_verifier does not match the code_challenge"}
 ```
 
-E a consequência que surpreende: **o código foi consumido na tentativa falha**. Corrigir
-o verifier e repetir devolve `code invalid, expired or already used`. Recomece do
-`/authorize`.
+**O código foi consumido na tentativa falha.** Corrigir o verifier e repetir devolve
+`code invalid, expired or already used`; é preciso recomeçar do `/authorize`.
 
 📖 [RFC 7636 §4](https://datatracker.ietf.org/doc/html/rfc7636#section-4)
 
@@ -81,14 +80,13 @@ usa o esquema `DPoP`, não `Bearer`.
 {"error":"invalid_dpop_proof","error_description":"DPoP proof already used (replay)"}
 ```
 
-Cada prova vale **uma vez**, por cinco minutos. Gere uma nova a cada requisição —
-inclusive nas retentativas. Reaproveitar a prova numa retentativa transforma um erro
-recuperável em outro que parece diferente e não é.
+Cada prova vale **uma vez**, por cinco minutos. Gere uma nova a cada requisição,
+inclusive nas retentativas: reaproveitar a prova converte um erro recuperável em outro,
+de diagnóstico mais difícil.
 
 Sem prova alguma: `missing DPoP header`.
 
-**Outra falha, a mais comum de todas:** montar o `htu` a partir da URL completa da
-requisição.
+**Erro comum:** montar o `htu` a partir da URL completa da requisição.
 
 ```json
 {"error":"invalid_dpop_proof","error_description":"htu must not contain a query string"}
@@ -96,8 +94,8 @@ requisição.
 
 A requisição pode ter query; o `htu` da prova, não. Para chamar
 `/api/accounts?limite=5`, a prova correta traz `htu` como
-`https://resource.certauth.dev/api/accounts` — sem a query. O servidor não a remove
-por você, e aceitar em silêncio ensinaria um formato que outro servidor recusa.
+`https://resource.certauth.dev/api/accounts`, sem a query. O servidor não a remove, e
+aceitá-la em silêncio ensinaria um formato que outros servidores recusam.
 
 📖 [RFC 9449 §4.2](https://datatracker.ietf.org/doc/html/rfc9449#section-4.2)
 
@@ -144,21 +142,21 @@ documento de discovery. **Não há segredo na requisição**: o certificado é a
 | Certificado não registrado | `the presented certificate is not the one registered for this client` |
 | Token vinculado a certificado anterior | `the certificate for this token is no longer the one registered for the client` |
 
-Conectar ao host mTLS **sem certificado nenhum** falha antes do HTTP existir, no
-handshake TLS. Espere erro de transporte, não JSON.
+Conectar ao host mTLS **sem certificado** falha antes do HTTP existir, no handshake
+TLS — o erro é de transporte, não JSON.
 
-### A reemissão derruba os tokens
+### Efeito da reemissão sobre os tokens
 
-Emitiu um certificado novo? **Todos os tokens atrelados ao anterior param de valer**,
-na hora.
+> **Ponto de atenção.** Emitir um certificado novo faz **todos os tokens atrelados ao
+> anterior deixarem de valer**, imediatamente.
 
-Isso acontece porque o Resource Server compara o certificado apresentado com **dois**
-valores: o `cnf` gravado no token e o thumbprint **atualmente registrado**. A segunda
-comparação é o que faz a reemissão ter efeito — sem ela, o par antigo (certificado A +
-token A) continuaria funcionando alegremente.
+O Resource Server compara o certificado apresentado com **dois** valores: o `cnf`
+gravado no token e o thumbprint **atualmente registrado**. É a segunda comparação que
+dá efeito à reemissão — sem ela, o par antigo (certificado A + token A) continuaria
+funcionando.
 
-É comportamento correto da RFC 8705, demonstrado de propósito. Se o seu acesso morreu
-logo depois de você clicar em "emitir novo certificado", é isto.
+É comportamento correto da RFC 8705, demonstrado de propósito. Um acesso que para de
+funcionar logo após a emissão de um certificado novo tem aqui a explicação.
 
 📖 [RFC 8705 §3](https://datatracker.ietf.org/doc/html/rfc8705#section-3)
 
@@ -218,7 +216,7 @@ grant_type=client_credentials
 &client_assertion=<client_assertion>
 ```
 
-Repare que não há `client_id` no corpo: quem identifica o cliente é o `sub` de dentro da
+Não há `client_id` no corpo: quem identifica o cliente é o `sub` de dentro da
 assertion. Identidade e prova chegam juntas.
 
 **A falha:** tente com o `client_secret`, que existe e é válido.
@@ -323,7 +321,7 @@ o pagamento concreto — valor, moeda, conta — em vez de uma permissão abstra
 pagamento precisa de tela de confirmação, e `client_credentials` não tem tela nem
 segunda parte. Registrar um cliente com `rar: true` sem `authorization_code` nos
 `grant_types` é recusado no ato — a cesta é imutável, e a alternativa seria uma RFC
-selecionada e inexercível para sempre.
+selecionada e permanentemente inexercível.
 
 **Duas falhas, e as duas são o ponto:**
 

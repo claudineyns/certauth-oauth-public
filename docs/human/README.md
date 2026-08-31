@@ -3,9 +3,8 @@
 Esta trilha é para quem vai dirigir os fluxos à mão: abrir o browser, montar a cesta,
 ver a tela de consentimento e acompanhar o que acontece no fio a cada passo.
 
-Pressupõe familiaridade com OAuth 2.0. Não é um curso sobre o protocolo — é o manual
-de operação **deste** playground, que é onde a teoria encontra um servidor de verdade
-respondendo.
+Pressupõe familiaridade com OAuth 2.0. Não é um curso sobre o protocolo: é o manual de
+operação **deste** playground, com um servidor real respondendo a cada passo.
 
 ## Percurso
 
@@ -14,7 +13,7 @@ respondendo.
 | [01 — Primeiros passos](01-primeiros-passos.md) | Montar a cesta, registrar o cliente, entender as três credenciais |
 | [02 — Authorization Code](02-authorization-code.md) | A dança de interação, PKCE, e o primeiro saldo consultado |
 | [03 — Consentimento cruzado](03-consentimento-cruzado.md) | Um terceiro acessando dados de outra PJ, e o que o escopo limita |
-| [04 — Revogação](04-revogacao.md) | Derrubar um token e derrubar um consentimento — são coisas diferentes |
+| [04 — Revogação](04-revogacao.md) | Revogar um token e revogar um consentimento: efeitos diferentes |
 | [05 — Mecanismos de segurança](05-mecanismos.md) | PKCE, DPoP, mTLS, Client Assertion, PAR, JAR, RAR — e o que acontece quando falham |
 
 Se o seu objetivo é **implementar um cliente** — em qualquer linguagem, ou por meio de
@@ -55,6 +54,6 @@ cesta cria as próprias PJs e as contas derivam delas.
 Os certificados são de CA pública, então `curl` funciona sem `-k` e o browser abre sem
 aviso.
 
-**Tudo expira.** Nenhum registro do sandbox passa de 24 horas, e a maior parte morre
-bem antes. Nada do que você criar aqui sobrevive ao dia seguinte — o que é liberador:
-não há como estragar nada.
+**Tudo expira.** Nenhum registro do sandbox passa de 24 horas, e a maior parte tem
+prazo bem menor. Nada criado aqui permanece até o dia seguinte, e não há como causar
+dano permanente.

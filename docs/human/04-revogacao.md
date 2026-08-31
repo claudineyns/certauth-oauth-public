@@ -2,10 +2,10 @@
 
 [← 03 Consentimento cruzado](03-consentimento-cruzado.md) · [índice](README.md) · a seguir: [05 — Mecanismos](05-mecanismos.md)
 
-Terceiro cenário. E o ponto do capítulo é que **existem duas revogações diferentes**,
-com efeitos diferentes, e confundi-las produz um daqueles bugs que ninguém acha.
+Terceiro cenário. **Existem duas revogações diferentes**, com efeitos diferentes, e
+confundi-las produz falhas difíceis de diagnosticar.
 
-| | Quem faz | O que morre |
+| | Quem faz | O que deixa de valer |
 |---|---|---|
 | Revogar o **token** (RFC 7009) | O cliente | Aquele token, e só ele |
 | Revogar o **consentimento** | Qualquer das duas partes | A autorização inteira — todo token presente e futuro daquele par |
@@ -30,14 +30,14 @@ O efeito é imediato:
 {"error":"invalid_token","error_description":"token inactive, expired or revoked"}
 ```
 
-Duas armadilhas da RFC 7009 que valem conhecer:
+### Pontos de atenção
 
-**O `200` não significa que o token existia.** Revogar token inexistente ou já revogado
-também devolve `200`. É proposital — a resposta não pode virar um oráculo que confirma
-quais tokens são válidos. Nunca use o código de status para deduzir existência.
+**O `200` não significa que o token existia.** Revogar token inexistente ou já
+revogado também devolve `200`. É deliberado: a resposta não pode servir de oráculo
+sobre quais tokens são válidos. O código de status não permite deduzir existência.
 
-**O refresh token sobrevive.** Revogar um access token não derruba o refresh que o
-acompanhava. Se a intenção é encerrar o acesso, revogue os dois — ou revogue o
+**O refresh token continua válido.** Revogar um access token não invalida o refresh
+que o acompanhava. Para encerrar o acesso, revogue os dois — ou revogue o
 consentimento, adiante.
 
 📖 [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009)
@@ -68,36 +68,36 @@ HTTP/1.1 403 Forbidden
  "error_description":"no active consent from this legal entity for this client; it may have been revoked"}
 ```
 
-## O detalhe que revela o desenho
+## Separação de responsabilidades entre AS e RS
 
-Depois de revogar o consentimento, pergunte ao Authorization Server o que ele acha
-daquele token:
+Depois de revogar o consentimento, consulte o Authorization Server sobre aquele
+token:
 
 ```
 active: True | scope: accounts:read
 ```
 
-**O token continua ativo.** Não foi revogado, não expirou, e o AS o emitiria de novo
-sem hesitar. Quem recusa é o Resource Server, e por outro motivo: a autorização que
+**O token continua ativo.** Não foi revogado nem expirou, e o AS emitiria outro
+igual. Quem recusa é o Resource Server, por outro motivo: a autorização que
 justificava aquele acesso não existe mais.
 
-Isso não é inconsistência — é a separação de responsabilidades ficando visível. O AS
-responde *"este token é autêntico?"*. O RS responde *"esta autorização ainda vale?"*.
+Não é inconsistência, e sim a separação de responsabilidades ficando visível. O AS
+responde *"este token é autêntico?"*; o RS responde *"esta autorização ainda vale?"*.
 São perguntas diferentes, e só a segunda depende do consentimento.
 
-A consequência prática é a que interessa:
+A consequência prática:
 
-- `invalid_token` (401) → **pegue um token novo**, é o caminho certo.
-- `consent_required` (403) → **não adianta**. O AS emitirá outro token com prazer, e o
-  RS o recusará exatamente igual. Só um novo consentimento — pela tela, com alguém
-  presente — restaura o acesso.
+- `invalid_token` (401) → **obter um token novo** resolve.
+- `consent_required` (403) → **obter outro token não resolve**. O AS emitirá outro, e
+  o RS o recusará igual. Só um novo consentimento, concedido na tela, restaura o
+  acesso.
 
-Um cliente que trate os dois como a mesma coisa entra em laço: pede token, é recusado,
-pede outro, é recusado, para sempre.
+Um cliente que trate os dois casos como equivalentes entra em laço: pede token, é
+recusado, pede outro, é recusado.
 
-## O que mais derruba um acesso
+## O que invalida um acesso
 
-Revogação não é o único caminho. Vale ter o mapa:
+Revogação não é o único caminho:
 
 | Evento | Efeito |
 |---|---|
@@ -108,9 +108,8 @@ Revogação não é o único caminho. Vale ter o mapa:
 | `DELETE /register/{client_id}` | O cliente inteiro, em cascata |
 | Passar 24 horas | Tudo |
 
-As duas reemissões estão em [05 — Mecanismos](05-mecanismos.md); são as que mais
-surpreendem, porque a pessoa clica em "emitir novo" sem imaginar que está derrubando o
-que já estava em uso.
+As duas reemissões estão em [05 — Mecanismos](05-mecanismos.md). Em ambas, o material
+anterior é invalidado, e com ele os tokens que dependiam dele.
 
 ---
 

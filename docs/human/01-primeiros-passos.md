@@ -114,7 +114,7 @@ outro esquema é recusado, tanto no registro quanto na edição. Fragmento tamb�
 
 ## As três credenciais
 
-A resposta do registro devolve três segredos, e confundi-los é o tropeço mais comum:
+A resposta do registro devolve três segredos, com finalidades distintas:
 
 | Credencial | Serve para | Prazo |
 |---|---|---|
@@ -126,11 +126,12 @@ O `registration_access_token` — o **token de manutenção** — não é token 
 não compra nada no Resource Server: administra o cadastro e é a credencial da tela de
 manutenção.
 
-**O `client_secret` nunca é regenerado.** Não há endpoint de rotação. Perdeu, registra
-outro cliente.
+**O `client_secret` nunca é regenerado.** Não há endpoint de rotação; perdido o
+segredo, o caminho é registrar outro cliente.
 
-E atenção ao terceiro caso: se a cesta escolheu `mtls` ou `client_assertion`, o
-`client_secret` vem na resposta mas **não é aceito** em lugar nenhum. A cesta manda.
+> **Ponto de atenção.** Se a cesta escolheu `mtls` ou `client_assertion`, o
+> `client_secret` é devolvido no registro mas **não é aceito** em nenhum endpoint. A
+> autenticação passa a ser a que a cesta define.
 
 ## Administrar o registro
 
@@ -138,7 +139,7 @@ A segunda ação da tela principal pede o token de manutenção e abre a ediçã
 é a RFC 7592 — três campos graváveis e nada mais: `client_name`, `redirect_uris`,
 `grant_types`.
 
-Tentar alterar a cesta tem resposta própria, e não silêncio:
+Tentar alterar a cesta é recusado explicitamente:
 
 ```json
 {"error":"rfc_config_immutable",
@@ -146,13 +147,13 @@ Tentar alterar a cesta tem resposta própria, e não silêncio:
 ```
 
 É também na tela de manutenção que se emite o material que a cesta exigir — certificado
-de cliente para mTLS, par de chaves para JAR ou Client Assertion. Ambos reemissíveis,
-com uma consequência que vale conhecer antes de clicar; está em
+de cliente para mTLS, par de chaves para JAR ou Client Assertion. Ambos são
+reemissíveis, e a reemissão invalida o material anterior — o efeito está descrito em
 [05 — Mecanismos](05-mecanismos.md).
 
-Apagar o registro remove tudo em cascata: o cliente, a cesta, o thumbprint do
-certificado, a chave pública, os consentimentos e o próprio token de manutenção. As
-duas PJs sobrevivem, no prazo delas.
+Apagar o registro remove em cascata o cliente, a cesta, o thumbprint do certificado, a
+chave pública, os consentimentos e o próprio token de manutenção. As duas PJs
+permanecem até o fim do prazo delas.
 
 ---
 
