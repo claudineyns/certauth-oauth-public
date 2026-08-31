@@ -22,9 +22,9 @@ and subject to change without notice.
 So an integration begins with one human action:
 
 ```
-  human  -> opens the wizard, picks a basket, submits
-  system -> returns an initial_registration_token (IRT) and a pair of legal entities
-  agent  -> takes the IRT from here on
+  person      -> opens the wizard, picks a basket, submits
+  system      -> returns an initial_registration_token (IRT) and a pair of legal entities
+  integration -> takes the IRT from here on
 ```
 
 The IRT is the handoff. Once you hold it, nothing else requires a browser.
@@ -49,23 +49,26 @@ For reference — this is what the human hands you:
   "initial_registration_token": "<initial_registration_token>",
   "expires_in": 86400,
   "rfc_config": {
-    "modo_autorizacao": "query",
-    "proof": "nenhum",
-    "formato_token": "bearer",
+    "authorization_mode": "query",
+    "proof": "none",
+    "token_format": "bearer",
     "pkce": true,
     "rar": false,
     "client_assertion": false
   },
-  "pjs": [
-    {"id": "B961D002E8DD28", "identificador": "B9.61D.002/E8DD-28", "papel": "titular"},
-    {"id": "9C8FB561112A07", "identificador": "9C.8FB.561/112A-07", "papel": "correntista"}
+  "legal_entities": [
+    {"id": "A9701183A1D854", "identifier": "A9.701.183/A1D8-54", "role": "client_owner"},
+    {"id": "ED01D5E47F3A78", "identifier": "ED.01D.5E4/7F3A-78", "role": "third_party"}
   ]
 }
 ```
 
-The two legal entities (`pjs`) are created together and bound to each other. One is
-`titular` — the third party — and the other is `correntista` — the account holder.
-The distinction matters when calling the Resource Server; see
+Two legal entities are created together and bound to each other. The `client_owner`
+is the one your client belongs to; the `third_party` is not tied to the client and
+exists so you can exercise delegated access.
+
+The only rule you need from this: **`client_credentials` always acts as the
+`client_owner`** — it is the only entity that grant can reach. See
 [03 — Resources](03-resources.md).
 
 ### Reading the basket
@@ -74,10 +77,10 @@ The distinction matters when calling the Resource Server; see
 
 | Field | Values | Effect |
 |---|---|---|
-| `modo_autorizacao` | `query` · `par` · `jar` | How authorization request parameters travel |
+| `authorization_mode` | `query` · `par` · `jar` | How authorization request parameters travel |
 | `proof` | `nenhum` · `dpop` · `mtls` | Proof-of-possession mechanism, if any |
-| `formato_token` | `bearer` · `jwt` | Opaque token, or a signed JWT (RFC 9068) |
-| `alg` | `RS256` · `ES256` | Signing algorithm, only when `formato_token` is `jwt` |
+| `token_format` | `bearer` · `jwt` | Opaque token, or a signed JWT (RFC 9068) |
+| `alg` | `RS256` · `ES256` | Signing algorithm, only when `token_format` is `jwt` |
 | `pkce` | `true` · `false` | Whether PKCE is required on the code flow |
 | `rar` | `true` · `false` | Rich Authorization Requests; requires `authorization_code` |
 | `client_assertion` | `true` · `false` | Replaces the client secret with `private_key_jwt` |
@@ -122,7 +125,7 @@ Content-Type: application/json
   "redirect_uris": ["https://cliente.exemplo/callback"],
   "grant_types": ["client_credentials", "refresh_token"],
   "rfc_config": { "...": "the basket, echoed back" },
-  "pjs": [ { "...": "the two entities, now with names and bindings" } ]
+  "legal_entities": [ { "...": "the two entities, now with names and bindings" } ]
 }
 ```
 
@@ -234,7 +237,7 @@ X-Maintenance-Token: <registration_access_token>
   "private_key_pem": "-----BEGIN PRIVATE KEY-----\n...",
   "public_jwk": {"kty": "RSA", "n": "...", "e": "AQAB"},
   "reemissao": false,
-  "aviso": "A chave privada e exibida uma unica vez e nao fica no servidor."
+  "notice": "A chave privada e exibida uma unica vez e nao fica no servidor."
 }
 ```
 

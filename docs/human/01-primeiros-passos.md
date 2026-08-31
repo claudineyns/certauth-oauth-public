@@ -32,12 +32,12 @@ Ao salvar, três coisas nascem:
 {
   "initial_registration_token": "<initial_registration_token>",
   "expires_in": 86400,
-  "rfc_config": { "modo_autorizacao": "query", "proof": "nenhum",
-                  "formato_token": "bearer", "pkce": true,
+  "rfc_config": { "authorization_mode": "query", "proof": "none",
+                  "token_format": "bearer", "pkce": true,
                   "rar": false, "client_assertion": false },
-  "pjs": [
-    {"id": "B961D002E8DD28", "identificador": "B9.61D.002/E8DD-28", "papel": "titular"},
-    {"id": "9C8FB561112A07", "identificador": "9C.8FB.561/112A-07", "papel": "correntista"}
+  "legal_entities": [
+    {"id": "A9701183A1D854", "identifier": "A9.701.183/A1D8-54", "role": "client_owner"},
+    {"id": "ED01D5E47F3A78", "identifier": "ED.01D.5E4/7F3A-78", "role": "third_party"}
   ]
 }
 ```
@@ -45,9 +45,13 @@ Ao salvar, três coisas nascem:
 O **IRT** (*initial registration token*) é o que autoriza o registro do cliente. Vale
 24 horas e **uma vez só**.
 
-As duas **PJs** nascem juntas e ligadas uma à outra. A `titular` é o terceiro — quem
-quer acessar; a `correntista` é a dona da conta — quem autoriza. Essa dupla é o palco
-de todos os cenários adiante.
+As duas **PJs** nascem juntas e ligadas uma à outra. A `client_owner` é a dona do
+cliente que você acabou de registrar; a `third_party` não tem vínculo com ele. Ambas
+têm contas.
+
+A regra prática, e a única que importa guardar: **`client_credentials` age sempre
+como a `client_owner`**, e não alcança a outra. Chegar à `third_party` exige o
+Authorization Code, com login e consentimento na tela.
 
 ## Registrar o cliente
 
@@ -110,7 +114,7 @@ outro esquema é recusado, tanto no registro quanto na edição. Fragmento tamb�
 
 ## As três credenciais
 
-A resposta do registro devolve três segredos, e confundi-los é o tropeço mais comum:
+A resposta do registro devolve três segredos, com finalidades distintas:
 
 | Credencial | Serve para | Prazo |
 |---|---|---|
@@ -122,11 +126,12 @@ O `registration_access_token` — o **token de manutenção** — não é token 
 não compra nada no Resource Server: administra o cadastro e é a credencial da tela de
 manutenção.
 
-**O `client_secret` nunca é regenerado.** Não há endpoint de rotação. Perdeu, registra
-outro cliente.
+**O `client_secret` nunca é regenerado.** Não há endpoint de rotação; perdido o
+segredo, o caminho é registrar outro cliente.
 
-E atenção ao terceiro caso: se a cesta escolheu `mtls` ou `client_assertion`, o
-`client_secret` vem na resposta mas **não é aceito** em lugar nenhum. A cesta manda.
+> **Ponto de atenção.** Se a cesta escolheu `mtls` ou `client_assertion`, o
+> `client_secret` é devolvido no registro mas **não é aceito** em nenhum endpoint. A
+> autenticação passa a ser a que a cesta define.
 
 ## Administrar o registro
 
@@ -134,7 +139,7 @@ A segunda ação da tela principal pede o token de manutenção e abre a ediçã
 é a RFC 7592 — três campos graváveis e nada mais: `client_name`, `redirect_uris`,
 `grant_types`.
 
-Tentar alterar a cesta tem resposta própria, e não silêncio:
+Tentar alterar a cesta é recusado explicitamente:
 
 ```json
 {"error":"rfc_config_immutable",
@@ -142,13 +147,13 @@ Tentar alterar a cesta tem resposta própria, e não silêncio:
 ```
 
 É também na tela de manutenção que se emite o material que a cesta exigir — certificado
-de cliente para mTLS, par de chaves para JAR ou Client Assertion. Ambos reemissíveis,
-com uma consequência que vale conhecer antes de clicar; está em
+de cliente para mTLS, par de chaves para JAR ou Client Assertion. Ambos são
+reemissíveis, e a reemissão invalida o material anterior — o efeito está descrito em
 [05 — Mecanismos](05-mecanismos.md).
 
-Apagar o registro remove tudo em cascata: o cliente, a cesta, o thumbprint do
-certificado, a chave pública, os consentimentos e o próprio token de manutenção. As
-duas PJs sobrevivem, no prazo delas.
+Apagar o registro remove em cascata o cliente, a cesta, o thumbprint do certificado, a
+chave pública, os consentimentos e o próprio token de manutenção. As duas PJs
+permanecem até o fim do prazo delas.
 
 ---
 
