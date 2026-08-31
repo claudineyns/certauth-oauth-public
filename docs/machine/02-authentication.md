@@ -291,8 +291,8 @@ entity — the third party — on its own behalf. No consent screen is involved 
 there is no second party to consent.
 
 **`authorization_code`** requires a browser: the authorization endpoint redirects to
-a login screen and then a consent screen, both rendered by the UI. An agent cannot
-complete it. It is the only grant that produces cross-entity access and the only one
+a login screen and then a consent screen, both rendered by the UI. An unattended
+client cannot complete it. It is the only grant that produces cross-entity access and the only one
 that can carry Rich Authorization Requests.
 
 **`refresh_token`** is unattended, but the first refresh token comes from the

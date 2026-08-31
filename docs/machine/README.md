@@ -1,12 +1,15 @@
-# Machine track — unattended integration
+# Machine track — the wire contract
 
 This track describes the OAuth 2.0 Playground as a wire contract. It is written for
-an agent or service that integrates without a human in the loop.
+whoever implements a client against it: a software engineer building an integration,
+or an agent driving one. **"Unattended" throughout this track describes the
+integration being documented, not the reader.**
 
-There is no code here in any programming language, by design. What an integrator
-needs is the exchange itself — method, headers, body, status, response shape — plus
-the rules that decide what happens next. Anything else is a translation you would
-have to undo.
+There is no code here in any programming language, and that is deliberate. What an
+implementer needs is the exchange itself — method, headers, body, status, response
+shape — plus the rules that decide what happens next. The wire format serves Java, Go,
+Python and Rust equally; a sample in one of those is dead weight for the rest, and
+gets copied more often than it gets understood.
 
 Where a decision procedure is clearer than prose, it appears as pseudocode.
 
@@ -25,7 +28,7 @@ Where a decision procedure is clearer than prose, it appears as pseudocode.
 
 A client cannot exist until someone opens a browser and assembles an RFC basket. That
 step is done by a person, and no automated interface for it is supported. Everything
-after it is machine-driven. See [01 — Bootstrap](01-bootstrap.md); it is the first
+after it can be automated. See [01 — Bootstrap](01-bootstrap.md); it is the first
 thing that will block you if you skip it.
 
 **2. The basket decides what your client can do, and it is immutable.**

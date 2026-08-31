@@ -17,8 +17,9 @@ respondendo.
 | [04 — Revogação](04-revogacao.md) | Derrubar um token e derrubar um consentimento — são coisas diferentes |
 | [05 — Mecanismos de segurança](05-mecanismos.md) | PKCE, DPoP, mTLS, Client Assertion, PAR, JAR, RAR — e o que acontece quando falham |
 
-Se o seu objetivo é integração automatizada, sem ninguém na frente da tela, a trilha
-[`machine/`](../machine/) descreve o mesmo sistema como contrato HTTP.
+Se o seu objetivo é **implementar um cliente** — em qualquer linguagem, ou por meio de
+um agente —, a trilha [`machine/`](../machine/) descreve o mesmo sistema como contrato
+HTTP. Está em inglês, e é a única trilha que cobre esse ângulo.
 
 ## Como ler os exemplos
 

@@ -22,9 +22,9 @@ and subject to change without notice.
 So an integration begins with one human action:
 
 ```
-  human  -> opens the wizard, picks a basket, submits
-  system -> returns an initial_registration_token (IRT) and a pair of legal entities
-  agent  -> takes the IRT from here on
+  person      -> opens the wizard, picks a basket, submits
+  system      -> returns an initial_registration_token (IRT) and a pair of legal entities
+  integration -> takes the IRT from here on
 ```
 
 The IRT is the handoff. Once you hold it, nothing else requires a browser.
