@@ -10,16 +10,18 @@ your token is certificate-bound.
 
 ## The domain in one paragraph
 
-Two legal entities are created together with every basket and bound to each other.
-One is `titular` — a third party — and the other is `correntista` — the account
-holder. Accounts, balances and statement history belong to entities, not to clients.
+Two legal entities are created together with every basket and bound to each other:
+the `client_owner`, which your client belongs to, and a `third_party`, which it does
+not. Both hold accounts. Accounts and balances belong to entities, not to clients.
+
 A token names an entity in its `sub`, and **every response returns the data of the
 `sub`, never of whoever is holding the token.** That single rule is what produces
 isolation.
 
-Under `client_credentials` the `sub` is the `titular`: the client acts on its own
-behalf. Reaching the other entity's data requires the authorization code grant and
-an explicit consent — which requires a browser, and is therefore outside this track.
+Under `client_credentials` the `sub` is always the `client_owner` — that grant
+cannot reach any other entity. Reaching the `third_party` requires the authorization
+code grant and an explicit consent, which requires a browser and is therefore outside
+this track.
 
 ## Scopes
 
@@ -42,7 +44,7 @@ than assuming.
 | `GET` | `/api/accounts` | `accounts:read` |
 | `GET` | `/api/accounts/{accountId}` | `accounts:read` |
 | `GET` | `/api/accounts/{accountId}/balance` | `accounts:read` |
-| `GET` | `/api/accounts/{accountId}/extract` | `accounts:read` **and** `transactions:read` |
+| `GET` | `/api/accounts/{accountId}/statement` | `accounts:read` **and** `transactions:read` |
 | `GET` | `/api/transactions` | `transactions:read` |
 | `GET` | `/api/transactions/{txnId}` | `transactions:read` |
 | `POST` | `/api/transactions` | `transactions:write` |
@@ -64,14 +66,14 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "titular": "B961D002E8DD28",
+  "holder": "B961D002E8DD28",
   "accounts": [
-    {"account_id": "AC9C206FD55E", "tipo": "conta_corrente",
-     "agencia": "4338", "numero": "2891069-9", "moeda": "BRL",
-     "titular": "B961D002E8DD28"},
-    {"account_id": "ACB18C79E081", "tipo": "poupanca",
-     "agencia": "6886", "numero": "8746876-0", "moeda": "BRL",
-     "titular": "B961D002E8DD28"}
+    {"account_id": "AC9C206FD55E", "type": "checking",
+     "agencia": "4338", "numero": "2891069-9", "currency": "BRL",
+     "holder": "B961D002E8DD28"},
+    {"account_id": "ACB18C79E081", "type": "savings",
+     "agencia": "6886", "numero": "8746876-0", "currency": "BRL",
+     "holder": "B961D002E8DD28"}
   ]
 }
 ```
@@ -103,25 +105,25 @@ GET /api/accounts/<account_id>/balance HTTP/1.1
 Authorization: Bearer <access_token>
 ```
 ```json
-{"account_id": "AC618695DA4E", "saldo_disponivel": 0, "moeda": "BRL",
+{"account_id": "AC618695DA4E", "available_balance": 0, "currency": "BRL",
  "atualizado_em": "2026-08-30T06:02:49.011Z"}
 ```
 
-`GET /api/accounts/<account_id>/extract` returns the balance together with the
-movements. On a new account, `lancamentos` is `[]`.
+`GET /api/accounts/<account_id>/statement` returns the balance together with the
+movements. On a new account, `transactions` is `[]`.
 
 ## Creating a transaction
 
-Four fields are required — `account_id`, `amount`, `tipo`, `sentido` — and unknown
+Four fields are required — `account_id`, `amount`, `type`, `direction` — and unknown
 fields in the body are **ignored**, not rejected.
 
 | Field | Rule |
 |---|---|
 | `account_id` | must belong to the `sub` of the token |
 | `amount` | positive, at most 2 decimal places |
-| `tipo` | `pix`, `boleto`, `deposito` or `retirada` |
-| `sentido` | `debito` or `credito` |
-| `descricao` | optional, up to 140 characters |
+| `type` | `pix`, `boleto`, `deposito` or `retirada` |
+| `direction` | `debito` or `credito` |
+| `description` | optional, up to 140 characters |
 
 `deposito` only credits and `retirada` only debits; `pix` and `boleto` go both ways.
 There is no `currency` field — the system has one.
@@ -132,8 +134,8 @@ Host: resource.certauth.dev
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
-{"account_id": "AC618695DA4E", "amount": 2500.00, "tipo": "deposito",
- "sentido": "credito", "descricao": "Aporte inicial"}
+{"account_id": "AC618695DA4E", "amount": 2500.00, "type": "deposit",
+ "direction": "credit", "description": "Aporte inicial"}
 ```
 
 ```http
@@ -141,16 +143,16 @@ HTTP/1.1 201 Created
 ```
 ```json
 {"transaction_id": "TXABF577E3E504", "account_id": "AC618695DA4E",
- "tipo": "deposito", "sentido": "credito", "amount": 2500,
- "descricao": "Aporte inicial", "data": "2026-08-30T06:02:50.084Z",
- "origem": "criada", "criada_por": "<client_id>"}
+ "type": "deposit", "direction": "credit", "amount": 2500,
+ "description": "Aporte inicial", "booked_at": "2026-08-30T06:02:50.084Z",
+ "origin": "direct", "created_by": "<client_id>"}
 ```
 
 `credito` raises the balance and `debito` lowers it. After the deposit above and a
 `pix` debit of 150.00, the balance reads:
 
 ```json
-{"account_id": "AC618695DA4E", "saldo_disponivel": 2350, "moeda": "BRL",
+{"account_id": "AC618695DA4E", "available_balance": 2350, "currency": "BRL",
  "atualizado_em": "2026-08-30T06:02:51.118Z"}
 ```
 
@@ -162,12 +164,12 @@ The `account_id` above came from `GET /api/accounts` on the same token — it is
 constant, and it is not the same one shown earlier in this page.
 
 Under `client_credentials` this is **repeatable**: the client owns the account, so
-there is nothing to authorize per payment. `origem` reads `criada`.
+there is nothing to authorize per payment. `origin` reads `criada`.
 
 With a token carrying `authorization_details` — only obtainable through the
 authorization code grant — the same endpoint behaves differently: the token becomes
 single-use, the request body must match what was authorized down to the amount, and
-`sentido` must be `debito`, because a payment initiation is an outflow. `origem` then
+`direction` must be `debito`, because a payment initiation is an outflow. `origin` then
 reads `criada_via_rar`. An unattended integration cannot reach that path; it is
 described here so you recognise the distinction if you see it.
 
@@ -177,15 +179,15 @@ Validation of the transaction body. All four are `400` with `invalid_request`:
 
 ```json
 {"error":"invalid_request",
- "error_description":"tipo is required and must be one of: pix, boleto, deposito, retirada"}
+ "error_description":"type is required and must be one of: pix, boleto, deposit, withdrawal"}
 ```
 ```json
 {"error":"invalid_request",
- "error_description":"sentido is required and must be one of: debito, credito"}
+ "error_description":"direction is required and must be one of: debit, credit"}
 ```
 ```json
 {"error":"invalid_request",
- "error_description":"tipo and sentido are incompatible: deposito requires sentido credito"}
+ "error_description":"type and direction are incompatible: deposit requires direction credit"}
 ```
 ```json
 {"error":"invalid_request",
@@ -262,7 +264,7 @@ POST /api/consents/<client_id>.447550F48AFA89/revoke HTTP/1.1
 Authorization: Bearer <access_token>
 ```
 ```json
-{"revogado":"<client_id>.447550F48AFA89","efeito":"imediato"}
+{"revoked":"<client_id>.447550F48AFA89","effect":"immediate"}
 ```
 
 **Revocation does not revoke the token**, and the refusal that follows is a

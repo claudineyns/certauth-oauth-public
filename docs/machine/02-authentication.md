@@ -164,7 +164,7 @@ Host: oauth-mtls.certauth.dev
 ```
 ```json
 {"workload": "oauth-as-mtls",
- "certificado_cliente": {
+ "client_certificate": {
    "sha256_hex": "<sha256_hex>",
    "x5t_s256": "<x5t_s256>",
    "subject": "CN=<client_id>, O=OAuth Playground",
@@ -181,7 +181,7 @@ nothing.
 
 ## Token formats
 
-The basket's `formato_token` decides what you receive.
+The basket's `token_format` decides what you receive.
 
 **`bearer`** — an opaque hex string. It carries no information; the Resource Server
 resolves it internally.
@@ -286,9 +286,9 @@ The request itself may carry a query; only the proof's `htu` may not. A proof fo
 `grant_types_supported` is `authorization_code`, `client_credentials`,
 `refresh_token`.
 
-**`client_credentials`** is the unattended path. The client acts as the `titular`
-entity — the third party — on its own behalf. No consent screen is involved because
-there is no second party to consent.
+**`client_credentials`** is the unattended path. The client acts as its own
+`client_owner` entity, and cannot reach any other. No consent screen is involved
+because there is no second party to consent.
 
 **`authorization_code`** requires a browser: the authorization endpoint redirects to
 a login screen and then a consent screen, both rendered by the UI. An unattended

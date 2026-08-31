@@ -55,7 +55,7 @@ Authorization: Bearer <access_token>
 ```
 
 ```json
-{"revogado":"<client_id>.677410B4965245","efeito":"imediato"}
+{"revoked":"<client_id>.677410B4965245","effect":"immediate"}
 ```
 
 A próxima chamada com o **mesmo token que ainda não expirou**:

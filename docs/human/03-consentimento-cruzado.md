@@ -2,35 +2,31 @@
 
 [← 02 Authorization Code](02-authorization-code.md) · [índice](README.md) · a seguir: [04 — Revogação](04-revogacao.md)
 
-Segundo cenário: **um terceiro acessa dados da PJ correntista**. É o mesmo fluxo do
-capítulo anterior, olhado de outro ângulo — o de quem *não* é dono da conta.
+Segundo cenário: **o cliente acessa dados da PJ que não é dona dele**. É o mesmo fluxo
+do capítulo anterior, olhado do ângulo de quem exerce acesso delegado.
 
-## As duas PJs, e por que elas nascem em par
+## Por que as PJs nascem em par
 
 Toda cesta cria duas pessoas jurídicas ligadas entre si:
 
-| Papel | Quem é | No enredo |
-|---|---|---|
-| `titular` | Terceiro Serviços Digitais SA | Quem quer acessar |
-| `correntista` | Correntista Indústria e Comércio LTDA | Quem tem a conta e autoriza |
+| `role` | Vínculo com o cliente |
+|---|---|
+| `client_owner` | é a dona dele; é quem o `client_credentials` alcança |
+| `third_party` | nenhum; só é alcançada por Authorization Code, com consentimento |
 
-O cliente que você registrou representa o **terceiro**. As contas e o histórico
-pertencem à **correntista**. Entre um e outro só existe uma ponte: o consentimento que
-a correntista concede na tela, e que o token carrega.
-
-Sem essa dupla não haveria o que demonstrar — um cliente lendo os próprios dados não
-exercita delegação nenhuma.
+Ambas têm contas e perfil. A diferença inteira está no vínculo com o `client_id`: com
+uma só PJ, um cliente lendo os próprios dados não exercitaria delegação nenhuma.
 
 ## Quem o token representa
 
 A regra que organiza tudo no Resource Server: **toda resposta devolve os dados do `sub`
 do token, nunca de quem está segurando o token.**
 
-No fluxo do capítulo anterior, quem se autenticou na tela foi a correntista. Então:
+No fluxo do capítulo anterior, quem se autenticou na tela foi a `third_party`. Então:
 
 ```
-PJ titular    (terceiro)     C9B5DE4DDBF283
-PJ correntista (autenticou)  677410B4965245
+PJ client_owner              A9701183A1D854
+PJ third_party (autenticou)  ED01D5E47F3A78
 ```
 
 ```http
@@ -38,11 +34,11 @@ GET /api/accounts HTTP/1.1
 Authorization: Bearer <access_token>
 ```
 ```json
-{"titular": "677410B4965245", "accounts": [ ... ] }
+{"holder": "ED01D5E47F3A78", "accounts": [ ... ] }
 ```
 
-O cliente do terceiro recebeu dados da **correntista** — porque foi ela quem entrou e
-consentiu. O identificador do terceiro não aparece em lugar nenhum da resposta.
+O cliente recebeu dados da `third_party` — porque foi ela quem entrou e consentiu. O
+identificador da PJ dona do cliente não aparece em lugar nenhum da resposta.
 
 É daí que sai o isolamento, e ele é **estrutural, não uma checagem**: não existe
 endpoint que aceite um identificador de PJ como parâmetro. Não há como pedir os dados
@@ -67,7 +63,7 @@ WWW-Authenticate: Bearer error="insufficient_scope", scope="profile:read"
 ```
 
 O cabeçalho `WWW-Authenticate` **nomeia o que falta**. Vale ler antes de sair
-adivinhando: em `GET /api/accounts/{id}/extract`, por exemplo, faltam dois escopos ao
+adivinhando: em `GET /api/accounts/{id}/statement`, por exemplo, faltam dois escopos ao
 mesmo tempo — `accounts:read` **e** `transactions:read`.
 
 Os cinco escopos:

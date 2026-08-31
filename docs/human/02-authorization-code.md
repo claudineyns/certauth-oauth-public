@@ -2,8 +2,8 @@
 
 [← 01 Primeiros passos](01-primeiros-passos.md) · [índice](README.md) · a seguir: [03 — Consentimento cruzado](03-consentimento-cruzado.md)
 
-Primeiro cenário da especificação: **a PJ correntista consulta o próprio saldo**, por
-um cliente que agiu em nome dela.
+Primeiro cenário da especificação: **uma PJ consulta o próprio saldo**, por um cliente
+que agiu em nome dela — com login e consentimento na tela.
 
 ## Antes: o par PKCE
 
@@ -87,8 +87,8 @@ Com a senha certa, o AS avança o estado e diz para onde ir:
 
 ```json
 {"interaction":"<interaction>",
- "proximo":"/consent?interaction=<interaction>",
- "pj_autenticada":"677410B4965245"}
+ "next":"/consent?interaction=<interaction>",
+ "authenticated_legal_entity":"677410B4965245"}
 ```
 
 Note que a interação **muda de identificador** ao avançar. Não guarde o antigo.
@@ -166,8 +166,8 @@ Authorization: Bearer <access_token>
 
 ```json
 {"account_id": "AC618695DA4E",
- "saldo_disponivel": 0,
- "moeda": "BRL",
+ "available_balance": 0,
+ "currency": "BRL",
  "atualizado_em": "2026-08-30T06:02:49.011Z"}
 ```
 
@@ -178,7 +178,7 @@ mostrado aqui.
 lançar, e nada foi lançado ainda. Não há histórico fictício para ler — o extrato de uma
 conta nova vem `[]`.
 
-Para ter dinheiro, deposite. É o próprio playground ensinando o par `tipo`/`sentido`:
+Para ter dinheiro, deposite. É o próprio playground ensinando o par `type`/`direction`:
 
 ```http
 POST /api/transactions HTTP/1.1
@@ -187,7 +187,7 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {"account_id": "<account_id>", "amount": 2500.00,
- "tipo": "deposito", "sentido": "credito", "descricao": "Aporte inicial"}
+ "type": "deposit", "direction": "credit", "description": "Aporte inicial"}
 ```
 
 Consulte o saldo de novo e ele terá se movido. Parece óbvio, e é a diferença que mais
@@ -199,9 +199,9 @@ Os quatro campos obrigatórios, e a regra que liga dois deles:
 | Campo | Valor |
 |---|---|
 | `amount` | positivo, no máximo duas casas |
-| `tipo` | `pix`, `boleto`, `deposito` ou `retirada` |
-| `sentido` | `debito` ou `credito` |
-| `descricao` | opcional |
+| `type` | `pix`, `boleto`, `deposito` ou `retirada` |
+| `direction` | `debito` ou `credito` |
+| `description` | opcional |
 
 `deposito` só credita, `retirada` só debita — pedir o contrário é recusado. `pix` e
 `boleto` andam nos dois sentidos, porque de fato andam. Campos que o servidor não

@@ -345,7 +345,7 @@ Inverter o sentido:
 
 ```json
 {"error":"invalid_authorization_details",
- "error_description":"payment_initiation authorizes an outgoing payment: sentido must be debito"}
+ "error_description":"payment_initiation authorizes an outgoing payment: direction must be debit"}
 ```
 
 Sem a segunda conferência o `authorization_details` seria enfeite — o cliente pediria

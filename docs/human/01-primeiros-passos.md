@@ -32,12 +32,12 @@ Ao salvar, três coisas nascem:
 {
   "initial_registration_token": "<initial_registration_token>",
   "expires_in": 86400,
-  "rfc_config": { "modo_autorizacao": "query", "proof": "nenhum",
-                  "formato_token": "bearer", "pkce": true,
+  "rfc_config": { "authorization_mode": "query", "proof": "none",
+                  "token_format": "bearer", "pkce": true,
                   "rar": false, "client_assertion": false },
-  "pjs": [
-    {"id": "B961D002E8DD28", "identificador": "B9.61D.002/E8DD-28", "papel": "titular"},
-    {"id": "9C8FB561112A07", "identificador": "9C.8FB.561/112A-07", "papel": "correntista"}
+  "legal_entities": [
+    {"id": "A9701183A1D854", "identifier": "A9.701.183/A1D8-54", "role": "client_owner"},
+    {"id": "ED01D5E47F3A78", "identifier": "ED.01D.5E4/7F3A-78", "role": "third_party"}
   ]
 }
 ```
@@ -45,9 +45,13 @@ Ao salvar, três coisas nascem:
 O **IRT** (*initial registration token*) é o que autoriza o registro do cliente. Vale
 24 horas e **uma vez só**.
 
-As duas **PJs** nascem juntas e ligadas uma à outra. A `titular` é o terceiro — quem
-quer acessar; a `correntista` é a dona da conta — quem autoriza. Essa dupla é o palco
-de todos os cenários adiante.
+As duas **PJs** nascem juntas e ligadas uma à outra. A `client_owner` é a dona do
+cliente que você acabou de registrar; a `third_party` não tem vínculo com ele. Ambas
+têm contas.
+
+A regra prática, e a única que importa guardar: **`client_credentials` age sempre
+como a `client_owner`**, e não alcança a outra. Chegar à `third_party` exige o
+Authorization Code, com login e consentimento na tela.
 
 ## Registrar o cliente
 
