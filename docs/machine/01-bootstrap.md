@@ -15,9 +15,14 @@ would let an integrator skip the one step that requires understanding what is be
 assembled.
 
 Treat it as a precondition of your integration — the same way you would treat an
-account that someone has to open for you before you can call anything. Anything you
-might reach for to shortcut it is outside this contract: unsupported, undocumented,
-and subject to change without notice.
+account that someone has to open for you before you can call anything.
+
+To be precise about what kind of boundary this is: it is a **support boundary, not a
+technical one**. Nothing in the system blocks an automated call to the endpoint the
+wizard uses, and no CAPTCHA or session check stands in front of it. What the boundary
+means is that such a call is outside this contract — unsupported, undocumented, and
+subject to change without notice. Build on it and a future change will break you
+without warning.
 
 So an integration begins with one human action:
 
@@ -237,7 +242,7 @@ X-Maintenance-Token: <registration_access_token>
   "private_key_pem": "-----BEGIN PRIVATE KEY-----\n...",
   "public_jwk": {"kty": "RSA", "n": "...", "e": "AQAB"},
   "reissued": false,
-  "notice": "A chave privada e exibida uma unica vez e nao fica no servidor."
+  "notice": "The private key is shown once and is not kept on the server."
 }
 ```
 
